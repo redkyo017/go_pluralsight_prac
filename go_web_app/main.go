@@ -2,8 +2,7 @@ package main
 
 import (
 	"html/template"
-	"log"
-	"net/http"
+	"os"
 )
 
 // type myHandler struct {
@@ -55,26 +54,50 @@ func main() {
 	// if err != nil {
 	// 	log.Println(err)
 	// }
-	templates := populateTemplates()
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		requestedFile := r.URL.Path[1:]
-		t := templates.Lookup(requestedFile + ".html")
-		if t != nil {
-			if err := t.Execute(w, nil); err != nil {
-				log.Println(err)
-			}
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	})
-	http.Handle("/img/", http.FileServer(http.Dir("public")))
-	http.Handle("/css/", http.FileServer(http.Dir("public")))
-	http.ListenAndServe(":8000", nil)
+	// templates := populateTemplates()
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	requestedFile := r.URL.Path[1:]
+	// 	t := templates.Lookup(requestedFile + ".html")
+	// 	if t != nil {
+	// 		if err := t.Execute(w, nil); err != nil {
+	// 			log.Println(err)
+	// 		}
+	// 	} else {
+	// 		w.WriteHeader(http.StatusNotFound)
+	// 	}
+	// })
+	// http.Handle("/img/", http.FileServer(http.Dir("public")))
+	// http.Handle("/css/", http.FileServer(http.Dir("public")))
+	// http.ListenAndServe(":8000", nil)
+	p := Product{
+		Name:  "Lemonade",
+		Price: 2.16,
+	}
+	t := template.Must(template.New("").Parse(TemplateString))
+	t.Execute(os.Stdout, p)
 }
 
-func populateTemplates() *template.Template {
-	result := template.New("templates")
-	const basePath = "templates"
-	template.Must(result.ParseGlob(basePath + "/*.html"))
-	return result
+const tax = 6.75 / 100
+
+type Product struct {
+	Name  string
+	Price float32
 }
+
+func (p Product) PriceWithTax() float32 {
+	return p.Price * (1 + tax)
+}
+
+const TemplateString = `
+{{- "Item Information" }}
+Name: {{.Name}}
+Price: {{printf "$%.2f" .Price}}
+PriceWithTax: {{.PriceWithTax | printf "$%.2f"}}
+`
+
+// func populateTemplates() *template.Template {
+// 	result := template.New("templates")
+// 	const basePath = "templates"
+// 	template.Must(result.ParseGlob(basePath + "/*.html"))
+// 	return result
+// }
