@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strconv"
 )
 
 func main() {
-	name := "hung han"
+	name := os.Getenv("USER")
 	course := "go fund"
 	module := "4"
 	clip := 2
@@ -28,4 +29,13 @@ func main() {
 		total := iModule + clip
 		log.Println("total of module and clip", total)
 	}
+	log.Println("course before update", course)
+	updateCourse(&course)
+	log.Println("course after update", course)
+}
+
+func updateCourse(course *string) string {
+	*course = "new course"
+	log.Println("update course to", *course)
+	return *course
 }
